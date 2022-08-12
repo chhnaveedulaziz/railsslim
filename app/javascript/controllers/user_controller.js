@@ -1,16 +1,19 @@
 import {Controller} from "@hotwired/stimulus"
 
 export default class extends Controller {
-    static targets = ["container", "firstName", "lastName", "phoneNumber", "emailAddress"]
+    static targets = ["container", "firstName", "lastName", "phoneNumber", "emailAddress", "submitButton"]
 
     connect() {
+        this.submitButtonTarget.disabled = true
         // console.log('ok')
     }
 
     toggleValidation(element) {
         if (element.value === '' || element.value.length > 25) {
             element.style.borderColor = 'red'
+            element.parentElement.lastElementChild.classList.remove('hidden')
         } else {
+            element.parentElement.lastElementChild.classList.add('hidden')
             element.style.borderColor = 'green'
         }
     }
@@ -28,11 +31,13 @@ export default class extends Controller {
     validateFirstName() {
         let element = this.firstNameTarget
         this.toggleValidation(element)
+        this.validateAllFields()
     }
 
     validateLastName() {
         let element = this.lastNameTarget
         this.toggleValidation(element)
+        this.validateAllFields()
     }
 
     validatePhoneNumber() {
@@ -40,6 +45,7 @@ export default class extends Controller {
         if (element.value !== '') {
             this.reformatPhoneNumber(element)
         }
+        this.validateAllFields()
     }
 
     validateEmailAddress() {
@@ -47,10 +53,23 @@ export default class extends Controller {
         if (element.value !== '') {
             const result = this.emailValidator(element.value)
             if (result) {
+                element.parentElement.lastElementChild.classList.add('hidden')
                 element.style.borderColor = 'green'
             } else {
+                element.parentElement.lastElementChild.classList.remove('hidden')
                 element.style.borderColor = 'red'
             }
+        }
+        this.validateAllFields()
+    }
+
+    validateAllFields() {
+        if (this.firstNameTarget.value !== '' && this.lastNameTarget.value !== '' && this.phoneNumberTarget.value !== '' && this.emailValidator(this.emailAddressTarget.value) === true) {
+            this.submitButtonTarget.disabled = false
+            this.submitButtonTarget.classList.remove('bg-grey')
+        } else {
+            this.submitButtonTarget.disabled = true
+            this.submitButtonTarget.classList.add('bg-grey')
         }
     }
 }
